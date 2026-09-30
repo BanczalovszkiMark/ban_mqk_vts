@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
+from std_msgs.msg import Bool
 
 
 class WaterLevelNode(Node):
@@ -9,10 +10,18 @@ class WaterLevelNode(Node):
         super().__init__('water_level_node')
 
         self.waterLevel = 50.0
+        self.pumpOn = False
 
         self.publisher = self.create_publisher(
             Float32,
             '/water_level',
+            10
+        )
+
+        self.subscription = self.create_subscription(
+            Bool,
+            '/pump_command',
+            self.pump_command_callback,
             10
         )
 
@@ -21,8 +30,23 @@ class WaterLevelNode(Node):
             self.update_water_level
         )
 
+    def pump_command_callback(self, msg):
+
+        self.pumpOn = msg.data
+
+        self.get_logger().info(
+            f'Pump: {"ON" if self.pumpOn else "OFF"}'
+        )
+
     def update_water_level(self):
-        self.waterLevel -= 1.0
+
+        if self.pumpOn:
+            self.waterLevel += 5.0
+        else:
+            self.waterLevel -= 1.0
+
+        if self.waterLevel > 100.0:
+            self.waterLevel = 100.0
 
         if self.waterLevel < 0.0:
             self.waterLevel = 0.0

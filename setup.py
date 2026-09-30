@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'water_level_node = water_tower.water_level_node:main',
+            'pump_controller = water_tower.pump_controller:main',
         ],
     },
 )
